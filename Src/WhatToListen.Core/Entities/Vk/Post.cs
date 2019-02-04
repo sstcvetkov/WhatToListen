@@ -16,6 +16,7 @@ namespace WhatToListen.Core.Entities.Vk
 		public long OwnerId { get; set; }
 
 		public virtual ICollection<PostUser> Users { get; set; }
+		public virtual ICollection<PostPost> Posts { get; set; }
 
 		public ICollection<Album> Albums { get; set; }
 		public ICollection<Audio> Audios { get; set; }

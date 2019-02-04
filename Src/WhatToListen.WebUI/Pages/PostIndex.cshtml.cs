@@ -52,29 +52,29 @@ namespace WhatToListen.WebUI.Pages
 
 			if (!string.IsNullOrEmpty(sameFilter))
 			{
-				var post = _context.Posts.Include(x => x.Users)
-					.First(x => x.Id == long.Parse(sameFilter));
-				ViewData["SamePostId"] = sameFilter;
-				ViewData["SamePostOwnerId"] = post.OwnerId;
-				ViewData["SamePostText"] = post.Text;
+				//var post = _context.Posts.Include(x => x.Users)
+				//	.First(x => x.Id == long.Parse(sameFilter));
+				//ViewData["SamePostId"] = sameFilter;
+				//ViewData["SamePostOwnerId"] = post.OwnerId;
+				//ViewData["SamePostText"] = post.Text;
 
-				const int MinMainPostLikes = 10;
-				const int MinTargetLikes = 5;
-				var samePosts = _context.PostUsers
-					.Where(x => post.Users.Any(u => u.UserId == x.UserId))
-					.GroupBy(x => x.PostId)
-					.Select(x => new PostPost
-					{
-						ParentPost = post,
-						ChildPost = _context.Posts.Find(x.Key),
-						UsersCount = x.Select(z => z.UserId)
-							.Intersect(post.Users.Select(u => u.UserId)).Count()
-					})
-					.Where(x => x.UsersCount >= MinTargetLikes)
-					.OrderByDescending(x => x.UsersCount)
-					.Join(_context.Posts, pp => pp.Id, p => p.Id, (pp, p) => p);
+				//const int MinMainPostLikes = 10;
+				//const int MinTargetLikes = 5;
+				//var samePosts = _context.PostUsers
+				//	.Where(x => post.Users.Any(u => u.UserId == x.UserId))
+				//	.GroupBy(x => x.PostId)
+				//	.Select(x => new PostPost
+				//	{
+				//		ParentPost = post,
+				//		ChildPost = _context.Posts.Find(x.Key),
+				//		UsersCount = x.Select(z => z.UserId)
+				//			.Intersect(post.Users.Select(u => u.UserId)).Count()
+				//	})
+				//	.Where(x => x.UsersCount >= MinTargetLikes)
+				//	.OrderByDescending(x => x.UsersCount)
+				//	.Join(_context.Posts, pp => pp.Id, p => p.Id, (pp, p) => p);
 
-				posts = samePosts.Join(_context.Posts, pp => pp.Id, p => p.Id, (pp, p) => p);
+				//posts = samePosts.Join(_context.Posts, pp => pp.Id, p => p.Id, (pp, p) => p);
 			}
 
 			switch (sortOrder)

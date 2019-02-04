@@ -24,6 +24,9 @@ namespace WhatToListen.Core.Services
 			public ICollection<VkNet.Model.Attachments.Attachment> Attachments;
 		}
 
+		public const int MinMainPostLikes = 10;
+		public const int MinTargetLikes = 5;
+
 		private readonly IVkApi Api;
 		private readonly IUnitOfWork Repositories;
 		private readonly IRepository<Post> Posts;
@@ -202,40 +205,39 @@ namespace WhatToListen.Core.Services
 
 		public void UpdatePostPostsCache(Post post)
 		{
-			var minMainPostLikes = 10;
-			var minTargetLikes = 5;
 			Debug.Write($"Creating cache for postId[{post.Id.Align(0, -5)}], likes[{post.Liks.Align(0, -5)}]:");
 			var sw = new Stopwatch(); sw.Start();
 			long timeRemoved = 0;
 			// Remove existed cache
-			var existed = PostPosts.List(new PostPostsSpecification(post.Id));
+			var existed = post.Posts;
 			if (existed.Any())
 			{
 				PostPosts.Remove(existed);
 				timeRemoved = sw.ElapsedMilliseconds;
 				Debug.Write($"\ttimeRemoved: {timeRemoved.Align(0, -5)},");
 			}
-			// Create cache
+			CreatePostPostsCache(post);
+			var timeCreated = sw.ElapsedMilliseconds - timeRemoved;
+
+			Debug.WriteLine($"\tadded:{post.Posts.Count.Align(0, -5)} in {timeCreated.Align(0, -5)}");
+		}
+
+		public void CreatePostPostsCache(Post post)
+		{
 			var data = PostUsers.ListAll()
 				.Where(x => post.Users.Any(u => u.UserId == x.UserId))
 				.GroupBy(x => x.PostId)
 				.Where(x => x.Key != post.Id)
 				.Select(x => new PostPost
 				{
-					ParentPost = post,
-					ChildPost = Posts.Get(x.Key),
+					Post = Posts.Get(x.Key),
 					UsersCount = x.Select(z => z.UserId)
 						.Intersect(post.Users.Select(u => u.UserId)).Count()
 				})
-				.Where(x => x.UsersCount >= minTargetLikes)
+				.Where(x => x.UsersCount >= MinTargetLikes)
 				.OrderByDescending(x => x.UsersCount);
 
-			var arrayData = data.ToList();
-			if (arrayData.Count > 0)
-				PostPosts.Add(arrayData);
-			var timeCreated = sw.ElapsedMilliseconds - timeRemoved;
-
-			Debug.WriteLine($"\tadded:{arrayData.Count.Align(0, -5)} in {timeCreated.Align(0, -5)}");
+			post.Posts = data.ToList();
 		}
 
 		private static void SetUsers(Post post, ICollection<User> likers, ICollection<User> reporters)

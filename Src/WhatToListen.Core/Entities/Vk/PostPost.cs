@@ -2,8 +2,7 @@
 {
 	public class PostPost : Entity
 	{
-		public Post ParentPost { get; set; }
-		public Post ChildPost { get; set; }
+		public Post Post { get; set; }
 		public long UsersCount { get; set; }
 	}
 }
