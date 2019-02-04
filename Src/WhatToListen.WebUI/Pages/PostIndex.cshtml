@@ -1,0 +1,85 @@
+﻿@page
+@model WhatToListen.WebUI.Pages.PostIndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<p>
+    Click on likes to find similar ones <br>
+    <a href="https://vk.com/grimeofficial?w=wall@(ViewData["SamePostOwnerId"])_@(ViewData["SamePostId"])">
+        @(ViewData["SamePostText"]?.ToString()?.Length > 100 ? ViewData["SamePostText"].ToString().Substring(0, 100) : ViewData["SamePostText"]?.ToString())
+    </a>
+</p>
+
+<form asp-page="./PostIndex" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by tag:
+            <input type="text" name="SearchString" value="@Model.CurrentFilter" />
+            <input type="submit" value="Search" class="btn btn-default" /> |
+            <a asp-page="./PostIndex">Back to full List</a>
+        </p>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-page="./PostIndex" asp-route-sortOrder="@Model.LikesSort"
+                   asp-route-currentFilter="@Model.CurrentFilter">
+                    Liks
+                </a>
+            </th>
+            <th>
+                Text
+            </th>
+            <th>
+                <a asp-page="./PostIndex" asp-route-sortOrder="@Model.DateSort"
+                   asp-route-currentFilter="@Model.CurrentFilter">
+                    @Html.DisplayNameFor(model => model.Post[0].Date)
+                </a>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Post)
+        {
+            <tr>
+                <td>
+                    <a asp-page="./PostIndex" asp-route-sameFilter="@item.Id">
+                        @Html.DisplayFor(modelItem => item.Liks)
+                    </a>
+                </td>
+                <td>
+                    <a href="https://vk.com/grimeofficial?w=wall@(item.OwnerId)_@(item.Id)">@(item.Text?.Length > 100 ? item.Text.Substring(0, 100) : item.Text)</a>
+                </td>
+                <td>
+                    @(item.Date.ToShortDateString())
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@{
+    var prevDisabled = !Model.Post.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Post.HasNextPage ? "disabled" : "";
+}
+
+<a asp-page="./PostIndex"
+   asp-route-sortOrder="@Model.CurrentSort"
+   asp-route-pageIndex="@(Model.Post.PageIndex - 1)"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-page="./PostIndex"
+   asp-route-sortOrder="@Model.CurrentSort"
+   asp-route-pageIndex="@(Model.Post.PageIndex + 1)"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
